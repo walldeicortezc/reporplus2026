@@ -20,9 +20,8 @@ public class Produto {
             String descricao,
             BigDecimal saldoEstoque,
             BigDecimal valorUnitario,
-            LocalDate dataCadastro,
-            Status status,
-            GrupoProduto grupo) {
+            LocalDate dataCadastro)
+            {
 
         this.codigoBarras = validarTextoObrigatorio(
                 codigoBarras,
@@ -61,7 +60,7 @@ public class Produto {
         validarPositivo(quantidade, "Quantidade retirada deve ser maior que zero");
 
         if (saldoEstoque.compareTo(quantidade) < 0) {
-            throw new IllegalArgumentException("Saldo de estque insuficiente");
+            throw new IllegalArgumentException("Saldo de estoque insuficiente");
         }
 
         this.saldoEstoque = saldoEstoque.subtract(quantidade);
@@ -91,7 +90,7 @@ public class Produto {
         Objects.requireNonNull(grupo, "Grupo de produto é obrigatório");
 
         if (this.grupo != null && this.grupo != grupo) {
-            throw new IllegalArgumentException("Produto já pertence a outro grupo");
+            throw new IllegalStateException("Produto já pertence a outro grupo");
         }
 
         this.grupo = grupo;
@@ -142,7 +141,7 @@ public class Produto {
 
     private static void validarPositivo(BigDecimal valor, String mensagem) {
         Objects.requireNonNull(valor, mensagem);
-        if (valor.signum() < 0) {
+        if (valor.signum() <= 0) {
             throw new IllegalArgumentException(mensagem);
         }
     }

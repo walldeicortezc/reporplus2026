@@ -15,7 +15,7 @@ public class GrupoProduto {
         this.status = Status.ATIVO;
     }
 
-    public void adicionarProdutos(Produto produto) {
+    public void adicionarProduto(Produto produto) {
         Objects.requireNonNull(produto, "Produto é obrigatório");
 
         boolean codigoJaUtilizado = produtos.stream()
