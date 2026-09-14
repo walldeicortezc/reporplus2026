@@ -36,6 +36,11 @@ máximo, uma categoria.
 - a coleção interna de peças da categoria é protegida contra alteração externa;
 - o valor do estoque é calculado pela quantidade multiplicada pelo custo
   unitário.
+- categorias com o mesmo nome não podem ser cadastradas, sem diferenciar
+  letras maiúsculas e minúsculas;
+- códigos de peças são únicos em todo o estoque;
+- o cadastro de uma peça exige uma categoria existente;
+- os casos de uso de escrita são executados dentro de transações.
 
 ## Tecnologias
 
@@ -85,3 +90,5 @@ esperada é `OK`, com status HTTP 200.
   Repor+ e regras testadas;
 - `docs/aula-04-persistencia.md`: mapeamento JPA, PostgreSQL, repositories e
   migrations do Liquibase.
+- `docs/aula-05-repositories-servicos-transacoes.md`: consultas derivadas,
+  serviços transacionais, dirty checking e rollback.
