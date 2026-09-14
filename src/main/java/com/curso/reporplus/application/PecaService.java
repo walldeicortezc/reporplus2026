@@ -4,6 +4,7 @@ import com.curso.reporplus.domain.CategoriaPeca;
 import com.curso.reporplus.domain.Peca;
 import com.curso.reporplus.domain.Status;
 import com.curso.reporplus.repository.CategoriaPecaRepository;
+import com.curso.reporplus.repository.FornecedorRepository;
 import com.curso.reporplus.repository.PecaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,16 +16,24 @@ public class PecaService {
 
     private final PecaRepository pecaRepository;
     private final CategoriaPecaRepository categoriaRepository;
+    private final FornecedorRepository fornecedorRepository;
 
     public PecaService(
             PecaRepository pecaRepository,
-            CategoriaPecaRepository categoriaRepository) {
+            CategoriaPecaRepository categoriaRepository,
+            FornecedorRepository fornecedorRepository) {
         this.pecaRepository = pecaRepository;
         this.categoriaRepository = categoriaRepository;
+        this.fornecedorRepository = fornecedorRepository;
     }
 
     @Transactional
     public Peca cadastrar(Peca peca, Long categoriaId) {
+        return cadastrar(peca, categoriaId, null);
+    }
+
+    @Transactional
+    public Peca cadastrar(Peca peca, Long categoriaId, Long fornecedorId) {
         if (pecaRepository.existsByCodigo(peca.getCodigo())) {
             throw new RecursoDuplicadoException("Código da peça já cadastrado");
         }
@@ -34,6 +43,13 @@ public class PecaService {
                         "Categoria de peça não encontrada"));
 
         categoria.adicionarPeca(peca);
+
+        if (fornecedorId != null) {
+            peca.associarFornecedor(fornecedorRepository.findById(fornecedorId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException(
+                            "Fornecedor não encontrado")));
+        }
+
         return pecaRepository.save(peca);
     }
 

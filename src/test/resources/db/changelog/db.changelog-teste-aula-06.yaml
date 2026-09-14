@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-create-categoria-peca.yaml
+  - include:
+      file: db/changelog/changes/002-create-peca.yaml
+  - changeSet:
+      id: teste-insere-dado-anterior-a-aula-06
+      author: teste
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO categoria_peca (id, nome, status)
+              VALUES (9001, 'Motor', 'ATIVO');
+              INSERT INTO peca
+                (id, codigo, descricao, quantidade_estoque, custo_unitario,
+                 data_cadastro, status, categoria_peca_id)
+              VALUES
+                (9001, 'MOT-ANTIGA', 'Peca anterior', 7, 25.90,
+                 DATE '2026-09-14', 'ATIVO', 9001);
+  - include:
+      file: db/changelog/changes/003-fornecedor-e-estoque-minimo.yaml

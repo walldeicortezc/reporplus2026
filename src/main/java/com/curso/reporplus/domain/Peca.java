@@ -40,6 +40,9 @@ public class Peca {
     @Column(name = "quantidade_estoque", nullable = false)
     private int quantidadeEstoque;
 
+    @Column(name = "estoque_minimo", nullable = false)
+    private int estoqueMinimo;
+
     @Column(name = "custo_unitario", nullable = false, precision = 18, scale = 2)
     private BigDecimal custoUnitario;
 
@@ -57,6 +60,12 @@ public class Peca {
             foreignKey = @ForeignKey(name = "fk_peca_categoria_peca"))
     private CategoriaPeca categoria;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "fornecedor_id",
+            foreignKey = @ForeignKey(name = "fk_peca_fornecedor"))
+    private Fornecedor fornecedor;
+
     protected Peca() {
     }
 
@@ -66,6 +75,16 @@ public class Peca {
             int quantidadeEstoque,
             BigDecimal custoUnitario,
             LocalDate dataCadastro) {
+        this(codigo, descricao, quantidadeEstoque, custoUnitario, 0, dataCadastro);
+    }
+
+    public Peca(
+            String codigo,
+            String descricao,
+            int quantidadeEstoque,
+            BigDecimal custoUnitario,
+            int estoqueMinimo,
+            LocalDate dataCadastro) {
         this.codigo = validarTexto(codigo, "Código é obrigatório");
         this.descricao = validarTexto(descricao, "Descrição é obrigatória");
         this.quantidadeEstoque = validarNaoNegativo(
@@ -74,6 +93,9 @@ public class Peca {
         this.custoUnitario = validarNaoNegativo(
                 custoUnitario,
                 "Custo unitário não pode ser negativo");
+        this.estoqueMinimo = validarNaoNegativo(
+                estoqueMinimo,
+                "Estoque mínimo não pode ser negativo");
         this.dataCadastro = Objects.requireNonNull(
                 dataCadastro,
                 "Data de cadastro é obrigatória");
@@ -119,6 +141,16 @@ public class Peca {
         this.status = Status.INATIVO;
     }
 
+    public boolean estaAbaixoDoEstoqueMinimo() {
+        return quantidadeEstoque < estoqueMinimo;
+    }
+
+    public void associarFornecedor(Fornecedor fornecedor) {
+        this.fornecedor = Objects.requireNonNull(
+                fornecedor,
+                "Fornecedor é obrigatório");
+    }
+
     void associarA(CategoriaPeca categoria) {
         Objects.requireNonNull(categoria, "Categoria é obrigatória");
 
@@ -149,6 +181,10 @@ public class Peca {
         return custoUnitario;
     }
 
+    public int getEstoqueMinimo() {
+        return estoqueMinimo;
+    }
+
     public LocalDate getDataCadastro() {
         return dataCadastro;
     }
@@ -159,6 +195,10 @@ public class Peca {
 
     public CategoriaPeca getCategoria() {
         return categoria;
+    }
+
+    public Fornecedor getFornecedor() {
+        return fornecedor;
     }
 
     private static String validarTexto(String texto, String mensagem) {

@@ -3,5 +3,3 @@ databaseChangeLog:
       file: db/changelog/changes/001-create-categoria-peca.yaml
   - include:
       file: db/changelog/changes/002-create-peca.yaml
-  - include:
-      file: db/changelog/changes/003-fornecedor-e-estoque-minimo.yaml

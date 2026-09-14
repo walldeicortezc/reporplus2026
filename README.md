@@ -13,17 +13,19 @@ entrada, retirada e cálculo do valor armazenado em estoque.
 ## Modelo de domínio
 
 ```text
-CategoriaPeca 1 -------- N Peca
+CategoriaPeca 1 -------- N Peca N -------- 0..1 Fornecedor
 ```
 
 - `CategoriaPeca`: classifica as peças por função, como Motor, Freios, Elétrica
   e Hidráulica.
 - `Peca`: representa o item controlado no estoque por código único, descrição,
-  quantidade, custo unitário, data de cadastro e status.
-- `Status`: informa se uma categoria ou peça está `ATIVO` ou `INATIVO`.
+  quantidade, estoque mínimo, custo unitário, data de cadastro e status.
+- `Fornecedor`: identifica quem fornece uma peça, por razão social e CNPJ.
+- `Status`: informa se uma categoria, peça ou fornecedor está `ATIVO` ou
+  `INATIVO`.
 
-Uma categoria pode classificar várias peças, enquanto cada peça pertence a, no
-máximo, uma categoria.
+Uma categoria classifica várias peças. Cada peça exige uma categoria e pode ter
+um fornecedor. O fornecedor é opcional para preservar os cadastros antigos.
 
 ## Regras implementadas
 
@@ -41,6 +43,10 @@ máximo, uma categoria.
 - códigos de peças são únicos em todo o estoque;
 - o cadastro de uma peça exige uma categoria existente;
 - os casos de uso de escrita são executados dentro de transações.
+- estoque mínimo não pode ser negativo;
+- o sistema identifica quando a quantidade está abaixo do estoque mínimo;
+- CNPJ possui 14 dígitos e não pode se repetir;
+- uma peça pode ser cadastrada com ou sem fornecedor.
 
 ## Tecnologias
 
@@ -92,3 +98,5 @@ esperada é `OK`, com status HTTP 200.
   migrations do Liquibase.
 - `docs/aula-05-repositories-servicos-transacoes.md`: consultas derivadas,
   serviços transacionais, dirty checking e rollback.
+- `docs/aula-06-evolucao-modelo-liquibase-diff.md`: fornecedor, estoque mínimo,
+  comparação de esquemas e migração segura.
