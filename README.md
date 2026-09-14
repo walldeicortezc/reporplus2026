@@ -44,11 +44,24 @@ máximo, uma categoria.
 - Maven Wrapper;
 - Spring Web MVC;
 - Validation;
+- Spring Data JPA;
+- PostgreSQL;
+- H2 para testes automatizados;
+- Liquibase;
 - JUnit 5.
 
-Nesta etapa, o projeto ainda não utiliza JPA, banco de dados ou Liquibase.
+O Liquibase cria e versiona o esquema; o Hibernate apenas valida se os
+mapeamentos JPA correspondem às tabelas.
+
+## Configuração local do banco
+
+Copie `.env.example` para `.env` e informe somente as senhas locais. O arquivo
+`.env` é ignorado pelo Git e nunca deve ser publicado.
 
 ## Executando os testes
+
+Os testes usam um banco H2 temporário em memória. Portanto, não precisam da
+senha do PostgreSQL nem alteram o banco de desenvolvimento.
 
 No Windows:
 
@@ -59,7 +72,7 @@ No Windows:
 ## Executando a aplicação
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 Com a aplicação iniciada, acesse `http://localhost:8080/api/health`. A resposta
@@ -69,4 +82,6 @@ esperada é `OK`, com status HTTP 200.
 
 - `docs/tema-do-projeto.md`: ficha e limites do tema individual;
 - `docs/aula-03-dominio.md`: tradução do exemplo do professor para o domínio do
-  Repor+ e regras testadas.
+  Repor+ e regras testadas;
+- `docs/aula-04-persistencia.md`: mapeamento JPA, PostgreSQL, repositories e
+  migrations do Liquibase.

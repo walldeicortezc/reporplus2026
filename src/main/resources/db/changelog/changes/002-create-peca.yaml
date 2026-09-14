@@ -1,0 +1,100 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-01-create-peca
+      author: reporplus
+      comment: Cria a entidade principal do controle de estoque.
+      changes:
+        - createTable:
+            tableName: peca
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_peca
+                    nullable: false
+              - column:
+                  name: codigo
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descricao
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantidade_estoque
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: custo_unitario
+                  type: NUMERIC(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: data_cadastro
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: categoria_peca_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: peca
+
+  - changeSet:
+      id: 002-02-constraints-peca
+      author: reporplus
+      comment: Protege código, relacionamento, estoque, custo e status.
+      changes:
+        - addUniqueConstraint:
+            tableName: peca
+            columnNames: codigo
+            constraintName: uk_peca_codigo
+        - addForeignKeyConstraint:
+            baseTableName: peca
+            baseColumnNames: categoria_peca_id
+            referencedTableName: categoria_peca
+            referencedColumnNames: id
+            constraintName: fk_peca_categoria_peca
+            onDelete: RESTRICT
+        - sql:
+            sql: >
+              ALTER TABLE peca
+              ADD CONSTRAINT ck_peca_quantidade_estoque
+              CHECK (quantidade_estoque >= 0)
+        - sql:
+            sql: >
+              ALTER TABLE peca
+              ADD CONSTRAINT ck_peca_custo_unitario
+              CHECK (custo_unitario >= 0)
+        - sql:
+            sql: >
+              ALTER TABLE peca
+              ADD CONSTRAINT ck_peca_status
+              CHECK (status IN ('ATIVO', 'INATIVO'))
+      rollback:
+        - sql:
+            sql: ALTER TABLE peca DROP CONSTRAINT ck_peca_status
+        - sql:
+            sql: ALTER TABLE peca DROP CONSTRAINT ck_peca_custo_unitario
+        - sql:
+            sql: ALTER TABLE peca DROP CONSTRAINT ck_peca_quantidade_estoque
+        - dropForeignKeyConstraint:
+            baseTableName: peca
+            constraintName: fk_peca_categoria_peca
+        - dropUniqueConstraint:
+            tableName: peca
+            constraintName: uk_peca_codigo

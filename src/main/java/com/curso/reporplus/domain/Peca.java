@@ -1,19 +1,64 @@
 package com.curso.reporplus.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
+@Table(
+        name = "peca",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_peca_codigo",
+                columnNames = "codigo"))
 public class Peca {
 
-    private final String codigo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 50)
+    private String codigo;
+
+    @Column(nullable = false, length = 150)
     private String descricao;
+
+    @Column(name = "quantidade_estoque", nullable = false)
     private int quantidadeEstoque;
+
+    @Column(name = "custo_unitario", nullable = false, precision = 18, scale = 2)
     private BigDecimal custoUnitario;
-    private final LocalDate dataCadastro;
+
+    @Column(name = "data_cadastro", nullable = false)
+    private LocalDate dataCadastro;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private Status status;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "categoria_peca_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_peca_categoria_peca"))
     private CategoriaPeca categoria;
+
+    protected Peca() {
+    }
 
     public Peca(
             String codigo,
@@ -82,6 +127,10 @@ public class Peca {
         }
 
         this.categoria = categoria;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getCodigo() {

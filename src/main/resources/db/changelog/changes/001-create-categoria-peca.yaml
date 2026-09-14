@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-01-create-categoria-peca
+      author: reporplus
+      comment: Cria a classificação funcional das peças.
+      changes:
+        - createTable:
+            tableName: categoria_peca
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_categoria_peca
+                    nullable: false
+              - column:
+                  name: nome
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: categoria_peca
+
+  - changeSet:
+      id: 001-02-check-status-categoria-peca
+      author: reporplus
+      comment: Mantém o banco coerente com o enum Status.
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE categoria_peca
+              ADD CONSTRAINT ck_categoria_peca_status
+              CHECK (status IN ('ATIVO', 'INATIVO'))
+      rollback:
+        - sql:
+            sql: >
+              ALTER TABLE categoria_peca
+              DROP CONSTRAINT ck_categoria_peca_status
