@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Repor+ - Aula 07",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "categoriaId", "value": ""},
+    {"key": "fornecedorId", "value": ""},
+    {"key": "pecaId", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "00 - Health check",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/health"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"]}}]
+    },
+    {
+      "name": "01 - Cadastrar categoria",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Filtros Aula 07\"\n}"},
+        "url": "{{baseUrl}}/api/categorias-pecas"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Categoria criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('categoriaId', pm.response.json().id);"]}}]
+    },
+    {
+      "name": "02 - Cadastrar fornecedor",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"razaoSocial\": \"Distribuidora Repor Mais\",\n  \"cnpj\": \"12345678000199\"\n}"},
+        "url": "{{baseUrl}}/api/fornecedores"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Fornecedor criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('fornecedorId', pm.response.json().id);"]}}]
+    },
+    {
+      "name": "03 - Cadastrar peca",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"codigo\": \"AULA07-FIL-001\",\n  \"descricao\": \"Filtro de oleo\",\n  \"quantidadeEstoque\": 20,\n  \"custoUnitario\": 49.90,\n  \"estoqueMinimo\": 5,\n  \"categoriaId\": {{categoriaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}"},
+        "url": "{{baseUrl}}/api/pecas"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Peca criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('pecaId', pm.response.json().id);"]}}]
+    },
+    {
+      "name": "04 - Buscar peca por ID",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/pecas/{{pecaId}}"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Peca encontrada', () => pm.response.to.have.status(200));"]}}]
+    },
+    {
+      "name": "05 - Listar pecas",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/pecas"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Retorna lista', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"]}}]
+    },
+    {
+      "name": "06 - Erro 400 - peca invalida",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"codigo\": \"\",\n  \"descricao\": \"\",\n  \"quantidadeEstoque\": -1,\n  \"custoUnitario\": -1,\n  \"estoqueMinimo\": -1,\n  \"categoriaId\": 0\n}"},
+        "url": "{{baseUrl}}/api/pecas"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Entrada invalida retorna 400', () => pm.response.to.have.status(400));"]}}]
+    },
+    {
+      "name": "07 - Erro 404 - peca inexistente",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/pecas/999999999"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Inexistente retorna 404', () => pm.response.to.have.status(404));"]}}]
+    },
+    {
+      "name": "08 - Erro 409 - categoria repetida",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Filtros Aula 07\"\n}"},
+        "url": "{{baseUrl}}/api/categorias-pecas"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Duplicado retorna 409', () => pm.response.to.have.status(409));"]}}]
+    }
+  ]
+}

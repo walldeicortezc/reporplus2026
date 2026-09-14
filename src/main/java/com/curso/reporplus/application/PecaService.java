@@ -70,6 +70,11 @@ public class PecaService {
         return pecaRepository.findByStatus(status);
     }
 
+    @Transactional(readOnly = true)
+    public List<Peca> listar() {
+        return pecaRepository.findAll();
+    }
+
     @Transactional
     public Peca receberEstoque(Long id, int quantidade) {
         Peca peca = buscarPorId(id);

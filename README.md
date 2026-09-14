@@ -89,6 +89,19 @@ No Windows:
 Com a aplicação iniciada, acesse `http://localhost:8080/api/health`. A resposta
 esperada é `OK`, com status HTTP 200.
 
+## API REST
+
+| Recurso | Cadastro | Listagem | Consulta por ID |
+|---|---|---|---|
+| Categorias | `POST /api/categorias-pecas` | `GET /api/categorias-pecas` | `GET /api/categorias-pecas/{id}` |
+| Fornecedores | `POST /api/fornecedores` | `GET /api/fornecedores` | `GET /api/fornecedores/{id}` |
+| Peças | `POST /api/pecas` | `GET /api/pecas` | `GET /api/pecas/{id}` |
+
+Cadastros devolvem `201 Created`. Consultas devolvem `200 OK`. Dados inválidos
+devolvem `400`, recursos inexistentes devolvem `404` e valores únicos repetidos
+devolvem `409`. As entidades JPA não são expostas: a API utiliza DTOs e
+mapeadores manuais.
+
 ## Documentação
 
 - `docs/tema-do-projeto.md`: ficha e limites do tema individual;
@@ -100,3 +113,5 @@ esperada é `OK`, com status HTTP 200.
   serviços transacionais, dirty checking e rollback.
 - `docs/aula-06-evolucao-modelo-liquibase-diff.md`: fornecedor, estoque mínimo,
   comparação de esquemas e migração segura.
+- `docs/aula-07-api-rest-dtos-mappers.md`: contratos JSON, validação,
+  controllers, erros HTTP, MockMvc e roteiro do Postman.
