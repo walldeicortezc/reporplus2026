@@ -41,6 +41,23 @@ class CategoriaPecaTest {
                 () -> categoria.adicionarPeca(novaPeca("MOT-FIL-001")));
     }
 
+    @Test
+    void deveAlterarNomeDaCategoria() {
+        CategoriaPeca categoria = new CategoriaPeca("Motor");
+
+        categoria.alterarNome("  Motor e transmissão  ");
+
+        assertEquals("Motor e transmissão", categoria.getNome());
+    }
+
+    @Test
+    void deveRejeitarNomeEmBrancoNaAlteracao() {
+        CategoriaPeca categoria = new CategoriaPeca("Motor");
+
+        assertThrows(IllegalArgumentException.class, () -> categoria.alterarNome("   "));
+        assertEquals("Motor", categoria.getNome());
+    }
+
     private static Peca novaPeca(String codigo) {
         return new Peca(
                 codigo,

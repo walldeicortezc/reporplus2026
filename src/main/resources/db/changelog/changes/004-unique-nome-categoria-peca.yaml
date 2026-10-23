@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-01-unique-nome-normalizado-categoria-peca
+      author: reporplus
+      dbms: postgresql
+      comment: Garante unicidade do nome da categoria ignorando caixa e espaços externos.
+      changes:
+        - sql:
+            sql: >
+              CREATE UNIQUE INDEX uk_categoria_peca_nome_lower
+              ON categoria_peca (LOWER(BTRIM(nome)))
+      rollback:
+        - sql:
+            sql: >
+              DROP INDEX uk_categoria_peca_nome_lower
+
+  - changeSet:
+      id: 004-02-unique-nome-normalizado-categoria-peca-h2
+      author: reporplus
+      dbms: h2
+      comment: Equivalente H2 usado exclusivamente pela suíte automatizada.
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE categoria_peca
+              ADD COLUMN nome_normalizado VARCHAR(120)
+              GENERATED ALWAYS AS (LOWER(TRIM(nome)))
+        - createIndex:
+            tableName: categoria_peca
+            indexName: uk_categoria_peca_nome_lower
+            unique: true
+            columns:
+              - column:
+                  name: nome_normalizado
+      rollback:
+        - dropIndex:
+            tableName: categoria_peca
+            indexName: uk_categoria_peca_nome_lower
+        - dropColumn:
+            tableName: categoria_peca
+            columnName: nome_normalizado

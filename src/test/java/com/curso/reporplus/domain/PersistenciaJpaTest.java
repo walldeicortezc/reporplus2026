@@ -70,4 +70,16 @@ class PersistenciaJpaTest {
                 """,
                 categoriaId));
     }
+
+    @Test
+    @Transactional
+    void bancoDeveImpedirNomeDeCategoriaDuplicadoIgnorandoMaiusculas() {
+        jdbcTemplate.update(
+                "INSERT INTO categoria_peca (nome, status) VALUES (?, 'ATIVO')",
+                "Papelaria");
+
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                "INSERT INTO categoria_peca (nome, status) VALUES (?, 'ATIVO')",
+                "PAPELARIA"));
+    }
 }

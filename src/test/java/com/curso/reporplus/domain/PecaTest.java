@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -81,6 +82,47 @@ class PecaTest {
                 "MOT-FIL-003", "Filtro", 2,
                 new BigDecimal("25.00"), -1,
                 LocalDate.of(2026, 9, 14)));
+    }
+
+    @Test
+    void deveAlterarDadosEditaveis() {
+        Peca peca = novaPeca(10, "48.90");
+        CategoriaPeca categoria = new CategoriaPeca("Nova categoria");
+
+        peca.alterarDescricao("Descrição alterada");
+        peca.alterarCustoUnitario(new BigDecimal("59.90"));
+        peca.alterarEstoqueMinimo(4);
+        peca.alterarCategoria(categoria);
+
+        assertEquals("Descrição alterada", peca.getDescricao());
+        assertEquals(new BigDecimal("59.90"), peca.getCustoUnitario());
+        assertEquals(4, peca.getEstoqueMinimo());
+        assertSame(categoria, peca.getCategoria());
+        assertTrue(categoria.getPecas().contains(peca));
+    }
+
+    @Test
+    void deveTrocarCategoriaMantendoOsDoisLados() {
+        Peca peca = novaPeca(10, "48.90");
+        CategoriaPeca anterior = new CategoriaPeca("Anterior");
+        CategoriaPeca nova = new CategoriaPeca("Nova");
+        anterior.adicionarPeca(peca);
+
+        peca.alterarCategoria(nova);
+
+        assertFalse(anterior.getPecas().contains(peca));
+        assertTrue(nova.getPecas().contains(peca));
+        assertSame(nova, peca.getCategoria());
+    }
+
+    @Test
+    void deveRemoverFornecedor() {
+        Peca peca = novaPeca(10, "48.90");
+        peca.associarFornecedor(new Fornecedor("Fornecedor", "12345678000199"));
+
+        peca.alterarFornecedor(null);
+
+        assertNull(peca.getFornecedor());
     }
 
     private static Peca novaPeca(int quantidade, String custo) {

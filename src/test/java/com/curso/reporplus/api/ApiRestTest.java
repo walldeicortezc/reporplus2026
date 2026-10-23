@@ -91,7 +91,8 @@ class ApiRestTest {
     void deveListarPecasCom200() throws Exception {
         mockMvc.perform(get("/api/pecas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.conteudo").isArray())
+                .andExpect(jsonPath("$.pagina").value(0));
     }
 
     @Test

@@ -37,17 +37,20 @@ public class CategoriaPeca {
     }
 
     public CategoriaPeca(String nome) {
-        if (nome == null || nome.isBlank()) {
-            throw new IllegalArgumentException("Nome da categoria é obrigatório");
-        }
-
-        this.nome = nome.trim();
+        this.nome = validarNome(nome);
         this.status = Status.ATIVO;
     }
 
     public void adicionarPeca(Peca peca) {
         Objects.requireNonNull(peca, "Peça é obrigatória");
+        peca.alterarCategoria(this);
+    }
 
+    public void alterarNome(String novoNome) {
+        this.nome = validarNome(novoNome);
+    }
+
+    void validarInclusao(Peca peca) {
         boolean codigoJaUtilizado = pecas.stream()
                 .anyMatch(item -> item != peca
                         && item.getCodigo().equals(peca.getCodigo()));
@@ -55,12 +58,16 @@ public class CategoriaPeca {
         if (codigoJaUtilizado) {
             throw new IllegalArgumentException("Código da peça já utilizado na categoria");
         }
+    }
 
-        peca.associarA(this);
-
+    void adicionarInternamente(Peca peca) {
         if (!pecas.contains(peca)) {
             pecas.add(peca);
         }
+    }
+
+    void removerInternamente(Peca peca) {
+        pecas.remove(peca);
     }
 
     public void ativar() {
@@ -85,5 +92,12 @@ public class CategoriaPeca {
 
     public List<Peca> getPecas() {
         return List.copyOf(pecas);
+    }
+
+    private static String validarNome(String nome) {
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("Nome da categoria é obrigatório");
+        }
+        return nome.trim();
     }
 }

@@ -1,0 +1,561 @@
+{
+  "info": {
+    "_postman_id": "f40b8f9d-a080-4f08-8a08-2026aula0800",
+    "name": "Repor+ - Aula 08",
+    "description": "CRUD completo, status, estoque, filtros, paginacao, ordenacao e cenarios de erro.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Health check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health"
+      },
+      "response": []
+    },
+    {
+      "name": "01 - Cadastrar categoria",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const runId = Date.now().toString();",
+              "const baseCnpj = ('000000000000' + runId).slice(-12);",
+              "const digito = (numeros) => { let peso = numeros.length - 7, soma = 0; for (const n of numeros) { soma += Number(n) * peso--; if (peso < 2) peso = 9; } const resto = soma % 11; return resto < 2 ? 0 : 11 - resto; };",
+              "const d1 = digito(baseCnpj);",
+              "pm.collectionVariables.set(\"categoriaNome\", `Filtros Aula 08 ${runId}`);",
+              "pm.collectionVariables.set(\"categoriaNomeAtualizada\", `Filtros e Lubrificacao ${runId}`);",
+              "pm.collectionVariables.set(\"cnpj\", baseCnpj + d1 + digito(baseCnpj + d1));",
+              "pm.collectionVariables.set(\"pecaCodigo\", `AULA08-${runId}`);",
+              "[\"categoriaId\", \"fornecedorId\", \"pecaId\"].forEach(k => pm.collectionVariables.unset(k));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Categoria criada\", () => { pm.response.to.have.status(201); pm.collectionVariables.set(\"categoriaId\", pm.response.json().id); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/categorias-pecas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{categoriaNome}}\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Cadastrar fornecedor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Fornecedor criado\", () => { pm.response.to.have.status(201); pm.collectionVariables.set(\"fornecedorId\", pm.response.json().id); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/fornecedores",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"razaoSocial\": \"Distribuidora Aula 08\",\n  \"cnpj\": \"{{cnpj}}\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Cadastrar peca",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Peca criada\", () => { pm.response.to.have.status(201); pm.collectionVariables.set(\"pecaId\", pm.response.json().id); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"{{pecaCodigo}}\",\n  \"descricao\": \"Filtro de oleo\",\n  \"quantidadeEstoque\": 20,\n  \"custoUnitario\": 49.90,\n  \"estoqueMinimo\": 5,\n  \"categoriaId\": {{categoriaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Buscar peca por ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Peca encontrada\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Alterar categoria",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Categoria alterada\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().nome).to.eql(pm.collectionVariables.get(\"categoriaNomeAtualizada\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{categoriaNomeAtualizada}}\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Inativar categoria",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Categoria inativada\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql(\"INATIVO\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"INATIVO\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Alterar peca",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Peca alterada\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().descricao).to.eql(\"Filtro de oleo premium\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descricao\": \"Filtro de oleo premium\",\n  \"custoUnitario\": 59.90,\n  \"estoqueMinimo\": 8,\n  \"categoriaId\": {{categoriaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Entrada de estoque",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Entrada registrada\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().quantidadeEstoque).to.eql(25); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/entradas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantidade\": 5\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Saida de estoque",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Saida registrada\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().quantidadeEstoque).to.eql(23); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/saidas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantidade\": 2\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 - Pesquisar pecas paginadas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Pagina de pecas\", () => { pm.response.to.have.status(200); const json = pm.response.json(); pm.expect(json.conteudo).to.be.an(\"array\"); pm.expect(json.pagina).to.eql(0); pm.expect(json.tamanho).to.eql(10); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/pecas?descricao=filtro&page=0&size=10&sort=descricao,asc"
+      },
+      "response": []
+    },
+    {
+      "name": "11 - Pesquisar categorias paginadas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Pagina de categorias\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().conteudo).to.be.an(\"array\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/categorias-pecas?nome=filtros&page=0&size=10&sort=nome,asc"
+      },
+      "response": []
+    },
+    {
+      "name": "12 - Erro 400 - peca invalida",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Entrada invalida retorna 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"\", \"descricao\": \"\", \"quantidadeEstoque\": -1,\n  \"custoUnitario\": -1, \"estoqueMinimo\": -1, \"categoriaId\": 0\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 - Erro 404 - peca inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Inexistente retorna 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/pecas/999999999"
+      },
+      "response": []
+    },
+    {
+      "name": "14 - Erro 409 - categoria repetida",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Duplicado retorna 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/categorias-pecas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{categoriaNomeAtualizada}}\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 - Erro 400 - saldo insuficiente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Saldo insuficiente retorna 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/saidas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantidade\": 99999\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "16 - Erro 400 - ordenacao invalida",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Ordenacao invalida retorna 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/pecas?sort=fornecedor.razaoSocial,asc"
+      },
+      "response": []
+    },
+    {
+      "name": "17 - Erro 409 - categoria em uso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Categoria em uso retorna 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "18 - Excluir peca",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Exclusao retorna 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Resposta sem corpo\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/pecas/{{pecaId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "19 - Excluir categoria",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Categoria excluida\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "categoriaNome",
+      "value": ""
+    },
+    {
+      "key": "categoriaNomeAtualizada",
+      "value": ""
+    },
+    {
+      "key": "cnpj",
+      "value": ""
+    },
+    {
+      "key": "pecaCodigo",
+      "value": ""
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "fornecedorId",
+      "value": ""
+    },
+    {
+      "key": "pecaId",
+      "value": ""
+    }
+  ]
+}

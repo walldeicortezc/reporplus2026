@@ -133,6 +133,31 @@ public class Peca {
                 "Custo unitário não pode ser negativo");
     }
 
+    public void alterarEstoqueMinimo(int novoEstoqueMinimo) {
+        this.estoqueMinimo = validarNaoNegativo(
+                novoEstoqueMinimo,
+                "Estoque mínimo não pode ser negativo");
+    }
+
+    public void alterarCategoria(CategoriaPeca novaCategoria) {
+        Objects.requireNonNull(novaCategoria, "Categoria é obrigatória");
+
+        if (this.categoria == novaCategoria) {
+            return;
+        }
+
+        novaCategoria.validarInclusao(this);
+        if (this.categoria != null) {
+            this.categoria.removerInternamente(this);
+        }
+        this.categoria = novaCategoria;
+        novaCategoria.adicionarInternamente(this);
+    }
+
+    public void alterarFornecedor(Fornecedor fornecedor) {
+        this.fornecedor = fornecedor;
+    }
+
     public void ativar() {
         this.status = Status.ATIVO;
     }
@@ -146,19 +171,11 @@ public class Peca {
     }
 
     public void associarFornecedor(Fornecedor fornecedor) {
-        this.fornecedor = Objects.requireNonNull(
-                fornecedor,
-                "Fornecedor é obrigatório");
+        alterarFornecedor(Objects.requireNonNull(fornecedor, "Fornecedor é obrigatório"));
     }
 
     void associarA(CategoriaPeca categoria) {
-        Objects.requireNonNull(categoria, "Categoria é obrigatória");
-
-        if (this.categoria != null && this.categoria != categoria) {
-            throw new IllegalStateException("Peça já pertence a outra categoria");
-        }
-
-        this.categoria = categoria;
+        alterarCategoria(categoria);
     }
 
     public Long getId() {

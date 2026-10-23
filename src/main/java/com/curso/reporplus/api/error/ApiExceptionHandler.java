@@ -2,6 +2,7 @@ package com.curso.reporplus.api.error;
 
 import com.curso.reporplus.application.RecursoDuplicadoException;
 import com.curso.reporplus.application.RecursoNaoEncontradoException;
+import com.curso.reporplus.application.RecursoEmUsoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(RecursoDuplicadoException.class)
     public ResponseEntity<ApiError> conflito(
             RecursoDuplicadoException exception, HttpServletRequest request) {
+        return resposta(HttpStatus.CONFLICT, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(RecursoEmUsoException.class)
+    public ResponseEntity<ApiError> recursoEmUso(
+            RecursoEmUsoException exception, HttpServletRequest request) {
         return resposta(HttpStatus.CONFLICT, exception.getMessage(), request, Map.of());
     }
 
