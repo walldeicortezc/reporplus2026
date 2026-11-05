@@ -52,11 +52,11 @@ class ApiRestTest {
         mockMvc.perform(post("/api/fornecedores")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"razaoSocial":"Fornecedor API","cnpj":"22222222000192"}
+                                {"razaoSocial":"Fornecedor API","cnpj":"11444777000161"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
-                .andExpect(jsonPath("$.cnpj").value("22222222000192"));
+                .andExpect(jsonPath("$.cnpj").value("11444777000161"));
     }
 
     @Test
