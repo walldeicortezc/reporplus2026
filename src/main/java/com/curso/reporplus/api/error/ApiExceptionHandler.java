@@ -1,12 +1,14 @@
 package com.curso.reporplus.api.error;
 
 import com.curso.reporplus.application.RecursoDuplicadoException;
+import com.curso.reporplus.application.CredenciaisInvalidasException;
 import com.curso.reporplus.application.RecursoNaoEncontradoException;
 import com.curso.reporplus.application.RecursoEmUsoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +19,12 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ApiError> credenciaisInvalidas(
+            CredenciaisInvalidasException exception, HttpServletRequest request) {
+        return resposta(HttpStatus.UNAUTHORIZED, exception.getMessage(), request, Map.of());
+    }
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ResponseEntity<ApiError> naoEncontrado(
@@ -34,6 +42,16 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiError> recursoEmUso(
             RecursoEmUsoException exception, HttpServletRequest request) {
         return resposta(HttpStatus.CONFLICT, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> integridade(
+            DataIntegrityViolationException exception, HttpServletRequest request) {
+        return resposta(
+                HttpStatus.CONFLICT,
+                "A operação viola uma regra de integridade",
+                request,
+                Map.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -55,9 +73,9 @@ public class ApiExceptionHandler {
         return resposta(HttpStatus.BAD_REQUEST, "JSON inválido", request, Map.of());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<ApiError> regraInvalida(
-            IllegalArgumentException exception, HttpServletRequest request) {
+            RuntimeException exception, HttpServletRequest request) {
         return resposta(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
     }
 

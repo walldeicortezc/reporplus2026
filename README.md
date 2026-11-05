@@ -2,8 +2,8 @@
 
 ## Tema
 
-API didática para controle de estoque e reposição de peças utilizadas em
-oficinas, caminhões e máquinas agrícolas.
+API didática para controle de estoque, reposição e venda de peças utilizadas
+em oficinas, caminhões e máquinas agrícolas.
 
 ## Objetivo
 
@@ -60,6 +60,9 @@ um fornecedor. O fornecedor é opcional para preservar os cadastros antigos.
 - H2 para testes automatizados;
 - Liquibase;
 - JUnit 5.
+- Spring Security, JWT e refresh token;
+- Springdoc OpenAPI/Swagger UI;
+- JaCoCo para cobertura de testes.
 
 O Liquibase cria e versiona o esquema; o Hibernate apenas valida se os
 mapeamentos JPA correspondem às tabelas.
@@ -77,7 +80,7 @@ senha do PostgreSQL nem alteram o banco de desenvolvimento.
 No Windows:
 
 ```powershell
-.\mvnw.cmd test
+.\mvnw.cmd verify
 ```
 
 ## Executando a aplicação
@@ -89,6 +92,9 @@ No Windows:
 Com a aplicação iniciada, acesse `http://localhost:8080/api/health`. A resposta
 esperada é `OK`, com status HTTP 200.
 
+No ambiente local, o Swagger UI está em `http://localhost:8080/swagger-ui.html`.
+No perfil `prod`, a documentação fica desabilitada.
+
 ## API REST
 
 | Recurso | Cadastro | Pesquisa paginada | Consulta por ID | Alteração | Exclusão |
@@ -96,6 +102,10 @@ esperada é `OK`, com status HTTP 200.
 | Categorias | `POST /api/categorias-pecas` | `GET /api/categorias-pecas` | `GET /api/categorias-pecas/{id}` | `PUT /api/categorias-pecas/{id}` | `DELETE /api/categorias-pecas/{id}` |
 | Fornecedores | `POST /api/fornecedores` | `GET /api/fornecedores` | `GET /api/fornecedores/{id}` | — | — |
 | Peças | `POST /api/pecas` | `GET /api/pecas` | `GET /api/pecas/{id}` | `PUT /api/pecas/{id}` | `DELETE /api/pecas/{id}` |
+| Pessoas | `POST /api/pessoas` | `GET /api/pessoas` | `GET /api/pessoas/{id}` | — | — |
+| Clientes | `POST /api/clientes` | `GET /api/clientes` | `GET /api/clientes/{id}` | `PUT /api/clientes/{id}` | — |
+| Colaboradores | `POST /api/colaboradores` | `GET /api/colaboradores` | `GET /api/colaboradores/{id}` | `PUT /api/colaboradores/{id}` | — |
+| Vendas | `POST /api/vendas` | `GET /api/vendas` | `GET /api/vendas/{id}` | itens/finalização/cancelamento | — |
 
 Cadastros devolvem `201 Created`. Consultas devolvem `200 OK`. Dados inválidos
 devolvem `400`, recursos inexistentes devolvem `404` e valores únicos repetidos
@@ -107,6 +117,9 @@ movimentado por `POST /api/pecas/{id}/estoque/entradas` e
 `POST /api/pecas/{id}/estoque/saidas`. As pesquisas aceitam filtros,
 ordenação permitida, páginas de tamanho máximo 100 e devolvem `PaginaResponse`
 em vez de arrays.
+
+A autenticação usa `/api/autenticacao/login`, `/refresh`, `/logout` e
+`/logout-todos`. Os endpoints protegidos recebem `Authorization: Bearer <token>`.
 
 ## Documentação
 
@@ -123,3 +136,5 @@ em vez de arrays.
   controllers, erros HTTP, MockMvc e roteiro do Postman.
 - `docs/aula-08-crud-filtros-paginacao.md`: atualização, status, exclusão,
   movimentação de estoque, Specifications, paginação e coleção Postman.
+- `docs/aulas-09-a-17.md`: OpenAPI, vendas, concorrência, autenticação,
+  autorização, cobertura, refresh token e auditoria de segurança.

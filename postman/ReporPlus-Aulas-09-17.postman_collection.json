@@ -1,0 +1,1498 @@
+{
+  "info": {
+    "_postman_id": "0a09c5d0-9f63-4b31-9eef-202609290009",
+    "name": "Repor+ 2026 - API completa",
+    "description": "Coleção executável das APIs desenvolvidas até a Aula 17. Além do ciclo de tokens, a pasta 11 demonstra resposta genérica de login e consulta administrativa da auditoria de segurança.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "adminLogin",
+      "value": "administrador",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "defina-a-mesma-senha-do-env",
+      "type": "string"
+    },
+    {
+      "key": "authLogin",
+      "value": "operador.postman",
+      "type": "string"
+    },
+    {
+      "key": "authPassword",
+      "value": "senha-didatica-postman-2026",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authPessoaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authContaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authCpf",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoriaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoriaNome",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fornecedorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fornecedorCnpj",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pecaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pecaCodigo",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pessoaClienteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clienteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pessoaColaboradorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "colaboradorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vendaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "itemVendaId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {"key": "token", "value": "{{accessToken}}", "type": "string"}
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Tempo de resposta inferior a 2 segundos', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Infraestrutura",
+      "description": "Verifica se a aplicação está disponível antes dos cenários de negócio.",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Confirma que a aplicação recebeu e processou a requisição HTTP."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Corpo OK', function () {",
+                  "    pm.expect(pm.response.text()).to.eql('OK');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Documento OpenAPI JSON",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v3/api-docs",
+            "description": "Obtém o contrato OpenAPI processável por ferramentas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Contrato identificado', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.info.title).to.eql('Repor+ API');",
+                  "    pm.expect(body.paths).to.have.property('/api/pecas/{id}');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Documento OpenAPI YAML",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v3/api-docs.yaml",
+            "description": "Obtém o mesmo contrato no formato YAML."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Documento YAML contém o título', function () {",
+                  "    pm.expect(pm.response.text()).to.include('Repor+ API');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Autorização e ciclo de tokens",
+      "description": "O administrador inicial vem das variáveis de ambiente. Seu JWT cria a conta OPERADOR; depois o par de tokens operacional é renovado, revogado e testado.",
+      "item": [
+        {
+          "name": "Login do administrador e salvar JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Administrador autenticado com 200', function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "    pm.collectionVariables.set('adminAccessToken', body.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{adminLogin}}\",\n  \"senha\": \"{{adminPassword}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/login"
+          }
+        },
+        {
+          "name": "Cadastrar pessoa da conta",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = String(Date.now()).slice(-9).padStart(9, '1');",
+                  "function digito(numeros, peso) {",
+                  "    let soma = 0;",
+                  "    for (let i = 0; i < numeros.length; i++) soma += Number(numeros[i]) * (peso - i);",
+                  "    const resto = soma % 11;",
+                  "    return resto < 2 ? 0 : 11 - resto;",
+                  "}",
+                  "const d1 = digito(base, 10);",
+                  "const cpf = base + d1 + digito(base + d1, 11);",
+                  "pm.collectionVariables.set('authCpf', cpf);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pessoa da conta criada com 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('authPessoaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Operador Postman\",\n  \"email\": \"operador.{{$timestamp}}@example.com\",\n  \"cpf\": \"{{authCpf}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/pessoas"
+          }
+        },
+        {
+          "name": "Cadastrar conta OPERADOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conta criada com 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Resposta não expõe senha', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).not.to.have.property('senha');",
+                  "    pm.expect(body).not.to.have.property('senhaHash');",
+                  "});",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('authContaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{authPessoaId}},\n  \"login\": \"{{authLogin}}\",\n  \"senha\": \"{{authPassword}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/contas-acesso"
+          }
+        },
+        {
+          "name": "Login do OPERADOR e substituir JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login realizado com 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Token Bearer recebido', function () {",
+                  "    pm.expect(body.tokenType).to.eql('Bearer');",
+                  "    pm.expect(body.accessToken.split('.')).to.have.lengthOf(3);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{authLogin}}\",\n  \"senha\": \"{{authPassword}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/login"
+          }
+        },
+        {
+          "name": "Consultar minha conta autenticada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/contas-acesso/me"
+          },
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('JWT Bearer autenticou com 200', function () { pm.response.to.have.status(200); });"]}}]
+        },
+        {
+          "name": "OPERADOR não pode criar outra conta",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{authPessoaId}},\n  \"login\": \"conta.proibida\",\n  \"senha\": \"{{authPassword}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/contas-acesso"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OPERADOR recebe 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar o par de tokens",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/refresh",
+            "description": "Troca o refresh token atual por um novo. O token anterior torna-se inutilizável."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Par renovado com 200', function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+                  "    pm.expect(body.refreshToken).to.be.a('string').and.not.empty;",
+                  "    pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout da sessão atual",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/logout",
+            "description": "Revoga toda a família da sessão. A resposta não revela se o token existia."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logout concluído com 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh revogado deve falhar",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/refresh",
+            "description": "Comprova que o logout impede a renovação, embora o access token atual ainda possa ser aceito até expirar."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Refresh revogado recebe 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Preparação dos cadastros",
+      "description": "Cria os recursos utilizados pelas demais requisições e captura seus identificadores.",
+      "item": [
+        {
+          "name": "Cadastrar categoria de peças",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('categoriaNome', 'Grupo Postman ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Location informado', function () {",
+                  "    pm.response.to.have.header('Location');",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('categoriaId', body.id);",
+                  "pm.test('Grupo criado e ativo', function () {",
+                  "    pm.expect(body.nome).to.eql(pm.collectionVariables.get('categoriaNome'));",
+                  "    pm.expect(body.status).to.eql('ATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{categoriaNome}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/categorias-pecas",
+            "description": "Cria um grupo ativo com nome único."
+          }
+        },
+        {
+          "name": "Cadastrar fornecedor",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function digito(base) { let peso = base.length - 7; let soma = 0; for (const c of base) { soma += Number(c) * peso--; if (peso === 1) peso = 9; } const resto = soma % 11; return resto < 2 ? 0 : 11 - resto; }",
+                  "let base = String(Date.now()).slice(-12); if ([...base].every(c => c === base[0])) base = '123456780001';",
+                  "pm.collectionVariables.set('fornecedorCnpj', base + digito(base) + digito(base + digito(base)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('fornecedorId', body.id);",
+                  "pm.test('Fornecedor criado', function () {",
+                  "    pm.expect(body.cnpj).to.eql(pm.collectionVariables.get('fornecedorCnpj'));",
+                  "    pm.expect(body.status).to.eql('ATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razaoSocial\": \"Fornecedor criado pelo Postman\",\n  \"cnpj\": \"{{fornecedorCnpj}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/fornecedores",
+            "description": "Cria um fornecedor com CNPJ fictício de 14 dígitos."
+          }
+        },
+        {
+          "name": "Cadastrar peca",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('pecaCodigo', 'POSTMAN-' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('pecaId', body.id);",
+                  "pm.test('Peca criado com relacionamentos', function () {",
+                  "    pm.expect(body.codigo).to.eql(pm.collectionVariables.get('pecaCodigo'));",
+                  "    pm.expect(String(body.categoriaId)).to.eql(String(pm.collectionVariables.get('categoriaId')));",
+                  "    pm.expect(String(body.fornecedorId)).to.eql(String(pm.collectionVariables.get('fornecedorId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"{{pecaCodigo}}\",\n  \"descricao\": \"Peca criado pelo Postman\",\n  \"quantidadeEstoque\": 10.000,\n  \"custoUnitario\": 49.90,\n  \"estoqueMinimo\": 2.000,\n  \"categoriaId\": {{categoriaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas",
+            "description": "Cria um peca associado ao grupo e ao fornecedor criados anteriormente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Consultas por identificador e listagem",
+      "item": [
+        {
+          "name": "Buscar grupo por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e ID correto', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(String(pm.response.json().id)).to.eql(String(pm.collectionVariables.get('categoriaId')));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar fornecedor por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/fornecedores/{{fornecedorId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e ID correto', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(String(pm.response.json().id)).to.eql(String(pm.collectionVariables.get('fornecedorId')));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar fornecedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/fornecedores"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e resposta em lista', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar peca por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}",
+            "description": "Retorna os dados usados para preencher uma tela de alteração."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e representação completa', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(String(body.id)).to.eql(String(pm.collectionVariables.get('pecaId')));",
+                  "    pm.expect(body).to.have.property('categoriaId');",
+                  "    pm.expect(body).to.have.property('fornecedorId');",
+                  "    pm.expect(body).to.have.property('quantidadeEstoque');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Alterações e status",
+      "item": [
+        {
+          "name": "Alterar grupo com PUT",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{categoriaNome}} alterado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e nome alterado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().nome).to.include('alterado');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inativar grupo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INATIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Grupo inativo', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.eql('INATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar grupo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ATIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Grupo ativo', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.eql('ATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alterar peca com PUT",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Peca alterado pelo Postman\",\n  \"custoUnitario\": 59.90,\n  \"estoqueMinimo\": 4.000,\n  \"categoriaId\": {{categoriaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}",
+            "description": "Altera campos cadastrais sem modificar código, saldo ou status."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Peca alterado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().descricao).to.eql('Peca alterado pelo Postman');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inativar peca",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INATIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Peca inativo', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.eql('INATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar peca",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ATIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Peca ativo', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.eql('ATIVO');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 - Movimentações de estoque",
+      "item": [
+        {
+          "name": "Receber estoque",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantidade\": 5.000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/entradas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Saldo passou para 15', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(Number(pm.response.json().quantidadeEstoque)).to.eql(15);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retirar estoque",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantidade\": 2.000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/saidas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Saldo passou para 13', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(Number(pm.response.json().quantidadeEstoque)).to.eql(13);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 - Pesquisas, filtros e paginação",
+      "item": [
+        {
+          "name": "Pesquisar grupos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/categorias-pecas?nome=Postman&status=ATIVO&page=0&size=20&sort=nome,asc",
+            "description": "Exemplo com nome, status, paginação e ordenação. Todos os parâmetros são opcionais."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Página de grupos retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.conteudo).to.be.an('array');",
+                  "    pm.expect(body).to.have.property('totalElementos');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pesquisar pecas com todos os filtros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pecas?descricao=Postman&status=ATIVO&categoriaId={{categoriaId}}&fornecedorId={{fornecedorId}}&abaixoEstoqueMinimo=false&page=0&size=20&sort=descricao,asc",
+            "description": "Exemplo combinando descrição, status, relacionamentos, indicador de estoque, página e ordenação."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Página de pecas retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.conteudo).to.be.an('array');",
+                  "    pm.expect(body).to.have.property('pagina', 0);",
+                  "    pm.expect(body).to.have.property('totalPaginas');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 - Cenários de erro",
+      "description": "Confirma o contrato padronizado de erros sem alterar os recursos válidos do fluxo.",
+      "item": [
+        {
+          "name": "Peca inexistente retorna 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pecas/9223372036854775807"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404 e ApiError', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql(404);",
+                  "    pm.expect(body).to.have.property('message');",
+                  "    pm.expect(body).to.have.property('path');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quantidade zero retorna 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantidade\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}/estoque/saidas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400 e erro no campo quantidade', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.fields).to.have.property('quantidade');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Grupo duplicado retorna 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"{{categoriaNome}} alterado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/categorias-pecas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "    pm.expect(pm.response.json().status).to.eql(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 - Pessoas, clientes, colaboradores e vendas",
+      "description": "Exercita a composição de papéis, CPF, a relação Venda-Item-Peca e a baixa transacional de estoque.",
+      "item": [
+        {
+          "name": "Cadastrar pessoa do cliente",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [
+              "function cpf(base) { function dv(s, peso) { let soma = 0; for (const c of s) soma += Number(c) * peso--; const r = soma % 11; return r < 2 ? 0 : 11 - r; } const d1 = dv(base, 10); return base + d1 + dv(base + d1, 11); }",
+              "let base = String(Date.now()).slice(-9); if ([...base].every(c => c === base[0])) base = '123456789';",
+              "pm.collectionVariables.set('cpfCliente', cpf(base));"
+            ]}},
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('Pessoa cliente criada', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('pessoaClienteId', pm.response.json().id);"
+            ]}}
+          ],
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nome\": \"Cliente Postman\",\n  \"email\": \"cliente.{{$timestamp}}@example.com\",\n  \"cpf\": \"{{cpfCliente}}\"\n}","options":{"raw":{"language":"json"}}},
+            "url": "{{baseUrl}}/api/pessoas" }
+        },
+        {
+          "name": "Consultar pessoa por ID",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/pessoas/{{pessoaClienteId}}"},
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Pessoa encontrada', () => pm.response.to.have.status(200));"]}}]
+        },
+        {
+          "name": "Pesquisar pessoas",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/pessoas?nome=Postman&cpf={{cpfCliente}}&status=ATIVO&page=0&size=20&sort=id,asc"}
+        },
+        {
+          "name": "Alterar pessoa com PUT",
+          "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"nome\": \"Cliente Postman Alterado\",\n  \"email\": \"cliente.{{$timestamp}}@example.com\",\n  \"cpf\": \"{{cpfCliente}}\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/pessoas/{{pessoaClienteId}}"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Pessoa alterada', () => pm.response.to.have.status(200));"]}}]
+        },
+        {
+          "name": "Cadastrar cliente",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"pessoaId\": {{pessoaClienteId}},\n  \"telefone\": \"(11) 99999-0000\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/clientes"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Cliente criado', () => pm.response.to.have.status(201));","pm.collectionVariables.set('clienteId', pm.response.json().id);"]}}]
+        },
+        {
+          "name": "Alterar cliente com PUT",
+          "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"telefone\": \"(11) 98888-0000\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/clientes/{{clienteId}}"}
+        },
+        {
+          "name": "Consultar cliente por ID",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/clientes/{{clienteId}}"}
+        },
+        {
+          "name": "Pesquisar clientes",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/clientes?nome=Postman&status=ATIVO&page=0&size=20&sort=id,asc"}
+        },
+        {
+          "name": "Cadastrar pessoa do colaborador",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [
+              "function cpf(base) { function dv(s, peso) { let soma = 0; for (const c of s) soma += Number(c) * peso--; const r = soma % 11; return r < 2 ? 0 : 11 - r; } const d1 = dv(base, 10); return base + d1 + dv(base + d1, 11); }",
+              "let base = String(Date.now() + 7).slice(-9); if ([...base].every(c => c === base[0])) base = '123456789';",
+              "pm.collectionVariables.set('cpfColaborador', cpf(base));"
+            ]}},
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('Pessoa colaborador criada', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('pessoaColaboradorId', pm.response.json().id);"
+            ]}}
+          ],
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nome\": \"Vendedor Postman\",\n  \"email\": \"vendedor.{{$timestamp}}@example.com\",\n  \"cpf\": \"{{cpfColaborador}}\"\n}","options":{"raw":{"language":"json"}}},
+            "url": "{{baseUrl}}/api/pessoas" }
+        },
+        {
+          "name": "Cadastrar colaborador vendedor",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"pessoaId\": {{pessoaColaboradorId}},\n  \"matricula\": \"VEN-{{$timestamp}}\",\n  \"funcao\": \"VENDEDOR\",\n  \"dataAdmissao\": \"2026-09-29\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/colaboradores"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Colaborador criado', () => pm.response.to.have.status(201));","pm.collectionVariables.set('colaboradorId', pm.response.json().id);","pm.collectionVariables.set('matriculaColaborador', pm.response.json().matricula);"]}}]
+        },
+        {
+          "name": "Consultar colaborador por ID",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/colaboradores/{{colaboradorId}}"}
+        },
+        {
+          "name": "Alterar colaborador com PUT",
+          "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"matricula\": \"{{matriculaColaborador}}\",\n  \"funcao\": \"GERENTE\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/colaboradores/{{colaboradorId}}"}
+        },
+        {
+          "name": "Pesquisar colaboradores",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/colaboradores?nome=Postman&funcao=GERENTE&status=ATIVO&page=0&size=20"}
+        },
+        {
+          "name": "Abrir venda",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"clienteId\": {{clienteId}},\n  \"vendedorId\": {{colaboradorId}}\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/vendas"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Venda aberta', () => pm.response.to.have.status(201));","pm.collectionVariables.set('vendaId', pm.response.json().id);"]}}]
+        },
+        {
+          "name": "Adicionar item à venda",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"pecaId\": {{pecaId}},\n  \"quantidade\": 1.000\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/vendas/{{vendaId}}/itens"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Item adicionado', () => pm.response.to.have.status(200));","pm.collectionVariables.set('itemVendaId', pm.response.json().itens[0].id);"]}}]
+        },
+        {
+          "name": "Remover item da venda",
+          "request": {"method":"DELETE","header":[],"url":"{{baseUrl}}/api/vendas/{{vendaId}}/itens/{{itemVendaId}}"}
+        },
+        {
+          "name": "Adicionar novamente o item",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"pecaId\": {{pecaId}},\n  \"quantidade\": 1.000\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/vendas/{{vendaId}}/itens"}
+        },
+        {
+          "name": "Finalizar venda e baixar estoque",
+          "request": {"method":"POST","header":[],"url":"{{baseUrl}}/api/vendas/{{vendaId}}/finalizacao"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Venda finalizada', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql('FINALIZADA'); });"]}}]
+        },
+        {
+          "name": "Consultar venda completa",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/vendas/{{vendaId}}"}
+        },
+        {
+          "name": "Pesquisar vendas",
+          "request": {"method":"GET","header":[],"url":"{{baseUrl}}/api/vendas?status=FINALIZADA&clienteId={{clienteId}}&vendedorId={{colaboradorId}}&page=0&size=20&sort=dataVenda,desc"}
+        },
+        {
+          "name": "Abrir venda para cancelamento",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"clienteId\": {{clienteId}},\n  \"vendedorId\": {{colaboradorId}}\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/vendas"},
+          "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.collectionVariables.set('vendaCancelamentoId', pm.response.json().id);"]}}]
+        },
+        {
+          "name": "Cancelar venda aberta",
+          "request": {"method":"POST","header":[],"url":"{{baseUrl}}/api/vendas/{{vendaCancelamentoId}}/cancelamento"}
+        },
+        {
+          "name": "Inativar pessoa",
+          "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"status\": \"INATIVO\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/pessoas/{{pessoaClienteId}}/status"}
+        },
+        {
+          "name": "Reativar pessoa",
+          "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"status\": \"ATIVO\"\n}","options":{"raw":{"language":"json"}}},
+            "url":"{{baseUrl}}/api/pessoas/{{pessoaClienteId}}/status"}
+        }
+      ]
+    },
+    {
+      "name": "10 - Integridade histórica",
+      "description": "Demonstra que um peca já referenciado por item de venda não pode ser excluído, preservando o histórico comercial.",
+      "item": [
+        {
+          "name": "Impedir exclusão de peca vendido",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/pecas/{{pecaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Peca histórico protegido com 409', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Impedir exclusão do grupo ainda utilizado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/categorias-pecas/{{categoriaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Grupo em uso protegido com 409', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "11 - Proteção e auditoria da autenticação",
+      "description": "Registra uma falha sem revelar se a conta existe e consulta o evento com o JWT administrativo salvo no início da coleção.",
+      "item": [
+        {
+          "name": "Login desconhecido usa resposta genérica",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"conta.inexistente.postman\",\n  \"senha\": \"senha-incorreta-postman\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": "{{baseUrl}}/api/autenticacao/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Falha recebe 401 genérico', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    pm.expect(pm.response.json().message).to.eql('Login ou senha inválidos');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Administrador consulta falhas auditadas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{adminAccessToken}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auditoria-seguranca?tipo=LOGIN_FALHA&page=0&size=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auditoria administrativa responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Resposta não expõe login, senha ou tokens', function () {",
+                  "    const texto = pm.response.text();",
+                  "    pm.expect(texto).not.to.include('conta.inexistente.postman');",
+                  "    pm.expect(texto).not.to.include('senha-incorreta-postman');",
+                  "    pm.expect(texto).not.to.include('refreshToken');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
