@@ -7,10 +7,18 @@ import com.curso.reporplus.api.dto.MovimentacaoEstoqueRequest;
 import com.curso.reporplus.api.dto.PaginaResponse;
 import com.curso.reporplus.api.dto.StatusRequest;
 import com.curso.reporplus.api.mapper.PecaMapper;
+import com.curso.reporplus.api.error.ApiError;
 import com.curso.reporplus.application.PecaService;
 import com.curso.reporplus.domain.Peca;
 import com.curso.reporplus.domain.Status;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +37,7 @@ import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/pecas")
+@Tag(name = "Peças", description = "Cadastro, consulta e movimentação do estoque")
 public class PecaController {
 
     private final PecaService service;
@@ -47,8 +56,20 @@ public class PecaController {
         return ResponseEntity.created(location).body(mapper.toResponse(cadastrada));
     }
 
+    @Operation(
+            summary = "Consultar peca por ID",
+            description = "Retorna os dados completos da peça para consulta ou alteração.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Peça encontrada"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Peça não encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @GetMapping("/{id}")
-    public PecaResponse buscarPorId(@PathVariable Long id) {
+    public PecaResponse buscarPorId(
+            @Parameter(description = "Identificador da peça", example = "1")
+            @PathVariable Long id) {
         return mapper.toResponse(service.buscarPorId(id));
     }
 
